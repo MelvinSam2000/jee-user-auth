@@ -56,7 +56,7 @@ public class SessionTokenTest {
     @Test
     void testValidate() {
         SessionToken token = tokenService.login("Alice", "passw1").orElseThrow();
-        assertFalse(tokenService.validate("Alice", new SessionToken(0)));
+        assertFalse(tokenService.validate("Alice", new SessionToken()));
         assertTrue(tokenService.validate("Alice", token));
     }
 

@@ -5,15 +5,16 @@ import com.msam.jee.dto.UserCredentialsDto;
 import com.msam.jee.ejb.token.SessionToken;
 import com.msam.jee.ejb.token.TokenService;
 import jakarta.ejb.EJB;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
 @Slf4j
 @Path("/auth")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthApi {
 
     @EJB
@@ -46,5 +47,12 @@ public class AuthApi {
     public void logout() {
         log.trace("Calling AuthApi.logout");
         //tokenService.logout();
+    }
+
+    @GET
+    @Path("/ping")
+    public String ping() {
+        log.info("Received PING");
+        return "AuthApi replied: pong";
     }
 }

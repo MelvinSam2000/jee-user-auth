@@ -1,5 +1,6 @@
 package com.msam.jee.dto;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.*;
 
 
@@ -9,6 +10,8 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 public class UserCredentialsDto {
+    @JsonbProperty("username")
     String username;
+    @JsonbProperty("raw_password")
     String rawPassword;
 }

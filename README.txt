@@ -1,17 +1,19 @@
 TODO:
 
 Soon:
-[ ] JPA/Database support
-[ ] JEE Security
-[ ] JSON Binding
-[ ] Jwt auth EJB
-[ ] Token expiration timer
-[ ] Configuration resource
+[x] JSON Binding
+[x] Token expiration timer
+[ ] Atbash testing
+[x] JMX
 
 Later:
-[ ] JBOSS
+[x] JBOSS
+[x] JBOSS logging
+[ ] JPA/Database support
+[ ] JEE Security
 [ ] Microprofile OPENAPI
-[ ] Arquillian integration test (abandoned)
 [ ] javadoc
 [ ] linting
-[ ] JMX
+
+[ ] Configuration resource
+[ ] Jwt auth EJB

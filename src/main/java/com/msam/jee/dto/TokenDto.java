@@ -1,5 +1,6 @@
 package com.msam.jee.dto;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.*;
 
 import java.time.ZonedDateTime;
@@ -11,6 +12,8 @@ import java.util.Optional;
 @ToString
 @EqualsAndHashCode
 public class TokenDto {
+    @JsonbProperty("token")
     String token;
-    Optional<ZonedDateTime> expirationTime;
+    @JsonbProperty("expiration_time")
+    ZonedDateTime expirationTime;
 }

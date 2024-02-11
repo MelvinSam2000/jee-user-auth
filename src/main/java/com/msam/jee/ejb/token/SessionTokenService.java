@@ -2,30 +2,53 @@ package com.msam.jee.ejb.token;
 
 import com.msam.jee.ejb.user.RawPassUserRepo;
 import com.msam.jee.ejb.user.UserRepo;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.ejb.*;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import javax.management.*;
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.msam.jee.ConfigurableConstants.FLUSH_EXPIRED_SESSIONS_PERIOD_SECS;
-
 
 @Slf4j
 @Singleton
-public final class SessionTokenService implements TokenService {
+public class SessionTokenService implements TokenService, SessionTokenServiceMBean {
 
-    private final Map<String, SessionToken> sessions = new HashMap<>();
+    final Map<String, SessionToken> sessions = new HashMap<>();
 
-    @Inject
-    @ConfigProperty(name = "auth.token.expiration-time-secs")
-    private int expirationTimeSecs;
+    ObjectName jmxObjName;
 
     @EJB
-    private UserRepo userRepo;
+    UserRepo userRepo;
+
+    @PostConstruct
+    public void registerMBean() {
+        try {
+            String packageStr = SessionTokenService.class.getPackageName();
+            String classStr = SessionTokenService.class.getSimpleName();
+            jmxObjName = new ObjectName(String.format("%s:type=%s", packageStr, classStr));
+            ManagementFactory.getPlatformMBeanServer().registerMBean(this, jmxObjName);
+            log.info("MBean registered [{}]", jmxObjName.toString());
+        } catch (MalformedObjectNameException |
+                 InstanceAlreadyExistsException |
+                 MBeanRegistrationException |
+                 NotCompliantMBeanException e) {
+            log.error("Could not register MBean for SessionTokenService", e);
+        }
+    }
+
+    @PreDestroy
+    public void unregisterMBean() {
+        try {
+            ManagementFactory.getPlatformMBeanServer().unregisterMBean(jmxObjName);
+        } catch (InstanceNotFoundException | MBeanRegistrationException e) {
+            log.error("Could not unregister MBean for RawPassUserRepo", e);
+        }
+    }
 
     @Override
     @Lock(LockType.READ)
@@ -42,8 +65,8 @@ public final class SessionTokenService implements TokenService {
 
     @Override
     @Lock(LockType.WRITE)
-    public Optional<SessionToken> login(String username, String password) {
-        if (!userRepo.validateCredentials(username, password)) {
+    public Optional<SessionToken> login(String username, String rawPassword) {
+        if (!userRepo.validateCredentials(username, rawPassword)) {
             log.info("Invalid credentials from user [{}]", username);
             return Optional.empty();
         }
@@ -51,7 +74,7 @@ public final class SessionTokenService implements TokenService {
             log.info("User [{}] already logged in", username);
             return Optional.empty();
         }
-        SessionToken token = new SessionToken(expirationTimeSecs);
+        SessionToken token = new SessionToken();
         sessions.put(username, token);
         return Optional.of(token);
     }
@@ -63,13 +86,18 @@ public final class SessionTokenService implements TokenService {
         sessions.remove(username);
     }
 
-    @Schedule(second = FLUSH_EXPIRED_SESSIONS_PERIOD_SECS)
+    //@Schedule(second = FLUSH_EXPIRED_SESSIONS_PERIOD_SECS)
+    @Schedule(hour = "*", minute = "*", second = "*/30", persistent = false)
     @Lock(LockType.WRITE)
     private void flushExpiredTokens() {
         log.trace("Flushing expired tokens...");
         sessions.entrySet().removeIf(entry ->
             entry.getValue().expired()
         );
+    }
 
+    @Override
+    public String getSessions() {
+        return sessions.toString();
     }
 }

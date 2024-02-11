@@ -6,27 +6,22 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.msam.jee.ConfigurableConstants.SESSION_EXPIRATION_TIME_SECS;
+
 @Data
 @ToString
 @EqualsAndHashCode
 public class SessionToken {
 
     private String rawToken;
-    private Optional<ZonedDateTime> expirationTime;
+    private ZonedDateTime expirationTime;
 
-    public SessionToken(long expirationTimeSecs) {
+    public SessionToken() {
         rawToken = UUID.randomUUID().toString();
-        if (expirationTimeSecs == 0) {
-            expirationTime = Optional.empty();
-        } else {
-            expirationTime = Optional.of(ZonedDateTime.now().plusSeconds(expirationTimeSecs));
-        }
+        expirationTime = ZonedDateTime.now().plusSeconds(SESSION_EXPIRATION_TIME_SECS);
     }
 
     public boolean expired() {
-        if (expirationTime.isEmpty()) {
-            return false;
-        }
-        return ZonedDateTime.now().isAfter(expirationTime.get());
+        return ZonedDateTime.now().isAfter(expirationTime);
     }
 }
