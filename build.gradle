@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'war'
+    id 'ear'
 }
 
 group = 'com.msam.jee'
@@ -12,16 +12,23 @@ repositories {
 
 dependencies {
 
-    implementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
-    implementation 'jakarta.ejb:jakarta.ejb-api:4.0.1'
     implementation 'org.slf4j:slf4j-api:2.0.12'
+    implementation 'org.slf4j:slf4j-simple:2.0.12'
+    implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    implementation 'org.eclipse.microprofile.config:microprofile-config-api:3.1'
 
     compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.jboss.arquillian.junit:arquillian-junit-container:1.8.0.Final'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
+
+    // ABANDONED...
+    //testImplementation 'org.jboss.arquillian:arquillian-bom:1.8.0.Final'
+    //testImplementation 'org.jboss.arquillian.junit:arquillian-junit-container:1.8.0.Final'
+    //testImplementation 'fish.payara.arquillian:arquillian-payara-server-embedded:3.0.alpha8'
+    //testImplementation 'fish.payara.extras:payara-embedded-all:6.2024.1'
 }
 
 test {

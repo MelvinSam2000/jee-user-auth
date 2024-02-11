@@ -1,7 +1,8 @@
 package com.msam.jee.testing;
 
+import com.msam.jee.ejb.token.SessionToken;
 import com.msam.jee.ejb.token.SessionTokenService;
-import com.msam.jee.ejb.user.UserRepoEjb;
+import com.msam.jee.ejb.user.RawPassUserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,8 @@ public class SessionTokenTest {
     protected SessionTokenService tokenService;
 
     @Mock
-    protected UserRepoEjb userRepo;
+    protected RawPassUserRepo userRepo;
+
 
     private final Map<String, String> testCredentials = Map.of(
             "Alice", "passw1",
@@ -43,7 +45,7 @@ public class SessionTokenTest {
 
     @Test
     void testLogin() {
-        Optional<String> token = tokenService.login("Alice", "invalidpass");
+        Optional<SessionToken> token = tokenService.login("Alice", "invalidpass");
         assertTrue(token.isEmpty());
         for (var entry : testCredentials.entrySet()) {
             token = tokenService.login(entry.getKey(), entry.getValue());
@@ -53,14 +55,14 @@ public class SessionTokenTest {
 
     @Test
     void testValidate() {
-        String token = tokenService.login("Alice", "passw1").orElseThrow();
-        assertFalse(tokenService.validate("Alice", ""));
+        SessionToken token = tokenService.login("Alice", "passw1").orElseThrow();
+        assertFalse(tokenService.validate("Alice", new SessionToken(0)));
         assertTrue(tokenService.validate("Alice", token));
     }
 
     @Test
     void testLogout() {
-        String token = tokenService.login("Alice", "passw1").orElseThrow();
+        SessionToken token = tokenService.login("Alice", "passw1").orElseThrow();
         tokenService.logout("Alice", token);
         assertFalse(tokenService.validate("Alice", token));
     }
